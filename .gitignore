@@ -1,0 +1,4 @@
+*.pyc
+albums/
+config.py
+tracks/
