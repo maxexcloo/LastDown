@@ -16,7 +16,7 @@ from mutagen.easyid3 import EasyID3
 ## Common ##
 ############
 
-# Create Directories
+# Create Output Directories
 def common_create_directories():
 	# Check If Directory Exists
 	if not os.path.exists(conf_output_album_folder):
@@ -28,19 +28,24 @@ def common_create_directories():
 		# Create Directory
 		os.makedirs(conf_output_track_folder)
 
-# Check Existence
+# Check Path Existence
 def common_exist(path):
-	# Check If Path Exists
+	# Check If Path Is File
 	if os.path.isfile(path):
 		# Check Path File Size
 		if os.path.getsize(path) != 0:
-			# Return True
+			# Return True If Not Null
 			return True
 
 	# Return False
 	return False
 
-# Windows Name Replace Function
+# Console Log
+def common_log(type, text):
+	# Print Message
+	print "[" + type + "] " + text
+
+# Windows Name Replace
 def common_windows_name_replace(text):
 	# Replace Special Forbidden Characters
 	text = text.replace("*", "")
@@ -57,20 +62,20 @@ def common_windows_name_replace(text):
 ## Mutagen ##
 #############
 
-# Delete MP3 ID3 Tags
+# Delete ID3 Tags
 def mutagen_delete(path):
 	# Open MP3 & Delete ID3 Tags
 	try:
 		file = mutagen.File(path, easy = True)
 		file.delall()
 		file.save()
-	# ID3 Error
+	# ID3 Deletion Error
 	except:
-		print "Error Deleting ID3 Tag: " + path
+		common_log("Mutagen", "Error Deleting ID3 Tag: " + path)
 
 # Edit MP3 ID3 Tags
 def mutagen_edit(path, artist, title, album, genre, tracknumber, year):
-	# Open MP3
+	# Open MP3 As EasyID3
 	try:
 		file = EasyID3(path)
 	# Add Missing MP3 Tags
@@ -95,8 +100,7 @@ def mutagen_edit(path, artist, title, album, genre, tracknumber, year):
 
 # Authenticate
 def last_authenticate():
-	global last
-	print "[Last.FM] Authenticating..."
+	common_log("Last.FM", "Authenticating...")
 
 	# Authenticate
 	try:
@@ -108,8 +112,7 @@ def last_authenticate():
 
 # Create Session
 def last_create_session():
-	global last_user
-	print "[Last.FM] Creating Session..."
+	common_log("Last.FM", "Creating Session...")
 
 	# Create Session & User
 	try:
@@ -118,7 +121,7 @@ def last_create_session():
 		last_user = pylast.User(auth_last_user, last)
 	# Session Error
 	except:
-		print "[Critical] Last.FM Session Creation Failed!"
+		common_log("Critical", "Last.FM Session Creation Failed!")
 		sys.exit(0)
 
 # Load Recent Tracks
