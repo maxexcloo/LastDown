@@ -6,25 +6,25 @@ if __name__ == "__main__":
 	# Create Directories
 	common_directories()
 
-	# Last.FM Authentication
+	# Last.fm Authentication
 	last_authenticate()
 
-	# Last.FM Session Creation
+	# Last.fm Session Creation
 	last_create_session()
 
-	# Last.FM Recent Track Check
+	# Last.fm Recent Track Check
 	if conf_last_recent_tracks > 0:
-		# Last.FM Load Recent Tracks
+		# Last.fm Load Recent Tracks
 		last_load_recent_tracks()
 
-	# Last.FM Top Albums Check
+	# Last.fm Top Albums Check
 	if conf_last_top_albums > 0:
-		# Last.FM Load Top Albums
+		# Last.fm Load Top Albums
 		last_load_top_albums()
 
-	# Last.FM Top Tracks Check
+	# Last.fm Top Tracks Check
 	if conf_last_top_tracks > 0:
-		# Last.FM Load Top Tracks
+		# Last.fm Load Top Tracks
 		last_load_top_tracks()
 
 	# Google Music Check Status

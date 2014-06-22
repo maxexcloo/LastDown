@@ -90,12 +90,12 @@ def mutagen_edit(path, artist, album, title, genre, track, year):
 	file.save()
 
 #############
-## Last.FM ##
+## Last.fm ##
 #############
 
 # Authenticate
 def last_authenticate():
-	common_log("Last.FM", "Authenticating...")
+	common_log("Last.fm", "Authenticating...")
 	global last
 
 	# Authenticate
@@ -103,12 +103,12 @@ def last_authenticate():
 		last = pylast.LastFMNetwork(api_key = auth_last_api_key, api_secret = auth_last_api_secret, username = auth_last_user, password_hash = pylast.md5(auth_last_pass))
 	# Authentication Error
 	except:
-		common_log("Critical", "Last.FM Authentication Failed!")
+		common_log("Critical", "Last.fm Authentication Failed!")
 		sys.exit(0)
 
 # Create Session
 def last_create_session():
-	common_log("Last.FM", "Creating Session...")
+	common_log("Last.fm", "Creating Session...")
 	global last_user
 
 	# Create Session
@@ -118,12 +118,12 @@ def last_create_session():
 		last_user = pylast.User(auth_last_user, last)
 	# Session Error
 	except:
-		common_log("Critical", "Last.FM Session Creation Failed!")
+		common_log("Critical", "Last.fm Session Creation Failed!")
 		sys.exit(0)
 
 # Load Recent Tracks
 def last_load_recent_tracks():
-	common_log("Last.FM", "Loading " + str(conf_last_recent_tracks) + " Recent Tracks...")
+	common_log("Last.fm", "Loading " + str(conf_last_recent_tracks) + " Recent Tracks...")
 	page = 0;
 
 	# Check Limit
@@ -159,7 +159,7 @@ def last_load_recent_tracks():
 
 # Load Top Albums
 def last_load_top_albums():
-	common_log("Last.FM", "Loading Top " + str(conf_last_top_albums) + " Albums...")
+	common_log("Last.fm", "Loading Top " + str(conf_last_top_albums) + " Albums...")
 
 	# Loop Through Time Periods
 	for time_period in conf_last_top_albums_period:
@@ -175,7 +175,7 @@ def last_load_top_albums():
 
 # Load Top Tracks
 def last_load_top_tracks():
-	common_log("Last.FM", "Loading Top " + str(conf_last_top_tracks) + " Tracks...")
+	common_log("Last.fm", "Loading Top " + str(conf_last_top_tracks) + " Tracks...")
 
 	# Loop Through Time Periods
 	for time_period in conf_last_top_tracks_period:
