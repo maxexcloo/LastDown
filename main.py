@@ -4,7 +4,7 @@ from function import *
 # Application Bootstrap
 if __name__ == "__main__":
 	# Create Directories
-	common_create_directories()
+	common_directories()
 
 	# Last.FM Authentication
 	last_authenticate()

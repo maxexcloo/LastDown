@@ -4,9 +4,8 @@ import gmusicapi
 import mutagen
 import os
 import pylast
+import string
 import time
-import unicodedata
-
 from config import *
 from gmusicapi import Mobileclient
 from gmusicapi import Webclient
@@ -16,8 +15,8 @@ from mutagen.easyid3 import EasyID3
 ## Common ##
 ############
 
-# Create Output Directories
-def common_create_directories():
+# Directory Creation
+def common_directories():
 	# Check If Directory Exists
 	if not os.path.exists(conf_output_album_folder):
 		# Create Directory
@@ -28,7 +27,7 @@ def common_create_directories():
 		# Create Directory
 		os.makedirs(conf_output_track_folder)
 
-# Check Path Existence
+# Existence Check
 def common_exist(path):
 	# Check If Path Is File
 	if os.path.isfile(path):
@@ -40,7 +39,7 @@ def common_exist(path):
 	# Return False
 	return False
 
-# Console Log
+# Logging Function
 def common_log(type, text):
 	# Print Message With Category
 	if type != "":
@@ -49,18 +48,10 @@ def common_log(type, text):
 	else:
 		print text
 
-# Windows Name Replace
-def common_windows_name_replace(text):
-	# Replace Disallowed Characters
-	text = text.replace("*", "")
-	text = text.replace(":", "")
-	text = text.replace("<", "")
-	text = text.replace(">", "")
-	text = text.replace("?", "")
-	text = text.replace("|", "")
-
-	# Remove UTF-8 Characters & Return
-	return unicodedata.normalize("NFKD", text)
+# Path Sanitisation
+def common_path(path):
+	valid = "()-./_ %s%s" % (string.ascii_letters, string.digits)
+	return ''.join(c for c in path if c in valid)
 
 #############
 ## Mutagen ##
@@ -242,7 +233,7 @@ def gmusic_download_album(id, path):
 
 		# Load Album & Download Tracks
 		for idtr in gmusicmobile.get_album_info(id['albumId'])['tracks']:
-			pathtr = common_windows_name_replace(path + "/" + str(idtr['trackNumber']) + ". " + idtr['artist'] + " - " + idtr['title'] + ".mp3")
+			pathtr = common_path(path + "/" + str(idtr['trackNumber']) + ". " + idtr['artist'] + " - " + idtr['title'] + ".mp3")
 
 			# Check If Track Exists
 			if common_exist(pathtr):
@@ -289,7 +280,7 @@ def gmusic_get_albums():
 	# Loop Through Albums
 	for i in global_albums:
 		string = i[0].__str__()
-		path = common_windows_name_replace(conf_output_album_folder + "/" + string)
+		path = common_path(conf_output_album_folder + "/" + string)
 		text = string.replace(" - ", " ")
 
 		# Search Music & Find ID
@@ -315,7 +306,7 @@ def gmusic_get_tracks():
 	for i in global_tracks:
 		string = i[0].__str__()
 		text = string.replace(" - ", " ")
-		path = common_windows_name_replace(conf_output_track_folder + "/" + string + ".mp3")
+		path = common_path(conf_output_track_folder + "/" + string + ".mp3")
 
 		# Check If Track Exists
 		if common_exist(path):
