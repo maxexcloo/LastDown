@@ -233,7 +233,7 @@ def gmusic_download_album(id, path):
 
 		# Load Album & Download Tracks
 		for idtr in gmusicmobile.get_album_info(id['albumId'])['tracks']:
-			pathtr = path + "/" + common_path(str(idtr['trackNumber']) + ". " + idtr['artist'] + " - " + idtr['title']) + ".mp3"
+			pathtr = path + "/" + idtr['artistId'][0] + " - " + idtr['storeId'] + ".mp3"
 
 			# Check If Track Exists
 			if common_exist(pathtr):
@@ -279,9 +279,8 @@ def gmusic_get_albums():
 
 	# Loop Through Albums
 	for i in global_albums:
-		string = i[0].__str__()
-		path = conf_output_album_folder + "/" + common_path(string)
-		text = string.replace(" - ", " ")
+		name = i[0].__str__()
+		text = name.replace(" - ", " ")
 
 		# Search Music & Find ID
 		try:
@@ -289,10 +288,11 @@ def gmusic_get_albums():
 			id = result['album_hits'][0]['album']
 		# Search Error
 		except:
-			common_log("", "Album Not Found: " + string)
+			common_log("", "Album Not Found: " + name)
 			continue
 
 		# Download Album
+		path = conf_output_album_folder + "/" + id['artistId'][0] + " - " + id['albumId']
 		gmusic_download_album(id, path)
 
 		# Sleep For Rate Limit Period
@@ -304,22 +304,23 @@ def gmusic_get_tracks():
 
 	# Loop Through Tracks
 	for i in global_tracks:
-		string = i[0].__str__()
-		text = string.replace(" - ", " ")
-		path = conf_output_track_folder + "/" + common_path(string) + ".mp3"
-
-		# Check If Track Exists
-		if common_exist(path):
-			common_log("", "Track Already Exists: " + string)
-			continue
+		name = i[0].__str__()
+		text = name.replace(" - ", " ")
 
 		# Search Music & Find ID
 		try:
 			result = gmusicmobile.search_all_access(text)
 			id = result['song_hits'][0]['track']
+			path = conf_output_track_folder + "/" + id['artistId'][0] + " - " + id['storeId'] + ".mp3"
+			pathal = conf_output_album_folder + "/" + id['artistId'][0] + " - " + id['albumId'] + "/" + id['artistId'][0] + " - " + id['storeId'] + ".mp3"
 		# Search Error
 		except:
-			common_log("", "Track Not Found: " + string)
+			common_log("", "Track Not Found: " + name)
+			continue
+
+		# Check If Track Exists
+		if common_exist(path) or common_exist(pathal):
+			common_log("", "Track Already Exists: " + name)
 			continue
 
 		# Download Track
