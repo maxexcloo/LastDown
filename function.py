@@ -4,7 +4,9 @@ import gmusicapi
 import mutagen
 import os
 import pylast
+import string
 import time
+import unicodedata
 from config import *
 from gmusicapi import Mobileclient
 from gmusicapi import Webclient
@@ -49,7 +51,8 @@ def common_log(type, text):
 
 # Path Sanitisation
 def common_path(path):
-	return "".join(c for c in path if c.isalpha() or c.isdigit() or c in "!#&'(),-.=%+[]_ ").strip()
+	valid = "!#&'(),-.=%+[]_ %s%s" % (string.ascii_letters, string.digits)
+	return "".join(c for c in unicodedata.normalize("NFKD", path) if c in valid).strip()
 
 #############
 ## Mutagen ##
