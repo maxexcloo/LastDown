@@ -4,6 +4,7 @@ import gmusicapi
 import mutagen
 import os
 import pylast
+import string
 import time
 from config import *
 from gmusicapi import Mobileclient
@@ -49,7 +50,7 @@ def common_log(type, text):
 
 # Path Sanitisation
 def common_path(path):
-	return "".join(c for c in path if c.isalpha() or c.isdigit() or c in "!&'(),-.=/%+_ ")
+	return "".join(c for c in path if c.isalpha() or c.isdigit() or c in "!#&'(),-.=%+[]_ ").strip()
 
 #############
 ## Mutagen ##
@@ -231,7 +232,7 @@ def gmusic_download_album(id, path):
 
 		# Load Album & Download Tracks
 		for idtr in gmusicmobile.get_album_info(id['albumId'])['tracks']:
-			pathtr = common_path(path + "/" + str(idtr['trackNumber']) + ". " + idtr['artist'] + " - " + idtr['title'] + ".mp3")
+			pathtr = path + "/" + common_path(str(idtr['trackNumber']) + ". " + idtr['artist'] + " - " + idtr['title']) + ".mp3"
 
 			# Check If Track Exists
 			if common_exist(pathtr):
@@ -278,7 +279,7 @@ def gmusic_get_albums():
 	# Loop Through Albums
 	for i in global_albums:
 		string = i[0].__str__()
-		path = common_path(conf_output_album_folder + "/" + string)
+		path = conf_output_album_folder + "/" + common_path(string)
 		text = string.replace(" - ", " ")
 
 		# Search Music & Find ID
@@ -304,7 +305,7 @@ def gmusic_get_tracks():
 	for i in global_tracks:
 		string = i[0].__str__()
 		text = string.replace(" - ", " ")
-		path = common_path(conf_output_track_folder + "/" + string + ".mp3")
+		path = conf_output_track_folder + "/" + common_path(string) + ".mp3"
 
 		# Check If Track Exists
 		if common_exist(path):
