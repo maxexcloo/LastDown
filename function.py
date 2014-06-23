@@ -51,7 +51,7 @@ def common_log(type, text):
 
 # Path Sanitisation
 def common_path(path):
-	valid = "!#&'(),-.=%+\[\]_ %s%s" % (string.ascii_letters, string.digits)
+	valid = "!#&'(),-.=%+_ %s%s" % (string.ascii_letters, string.digits)
 	return "".join(c for c in unicodedata.normalize("NFKD", unicode(path)) if c in valid).strip()
 
 #############
