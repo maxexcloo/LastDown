@@ -4,7 +4,6 @@ import gmusicapi
 import mutagen
 import os
 import pylast
-import string
 import time
 from config import *
 from gmusicapi import Mobileclient
