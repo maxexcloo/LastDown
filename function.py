@@ -5,6 +5,7 @@ import mutagen
 import os
 import pylast
 import string
+import sys
 import time
 import unicodedata
 from config import *

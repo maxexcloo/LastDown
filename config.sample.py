@@ -6,7 +6,7 @@ conf_output_track_folder = 'tracks'
 global_albums = []
 global_tracks = []
 
-# Last.FM Configuration
+# Last.fm Configuration
 conf_last_rate_limit = 0
 conf_last_recent_tracks = 0
 conf_last_top_albums = 20
@@ -14,7 +14,7 @@ conf_last_top_albums_period = ['PERIOD_OVERALL']
 conf_last_top_tracks = 20
 conf_last_top_tracks_period = ['PERIOD_OVERALL']
 
-# Last.FM Authentication
+# Last.fm Authentication
 auth_last_user = ''
 auth_last_pass = ''
 auth_last_api_key = ''
