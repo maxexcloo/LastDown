@@ -7,36 +7,34 @@ if __name__ == "__main__":
 	common_directories()
 
 	# Last.fm Authentication
-	last_authenticate()
+	lastfm_authenticate()
 
 	# Last.fm Session Creation
-	last_create_session()
+	lastfm_create_session()
 
 	# Last.fm Recent Track Check
-	if conf_last_recent_tracks > 0:
+	if conf_lastfm_recent_tracks > 0:
 		# Last.fm Load Recent Tracks
-		last_load_recent_tracks()
+		lastfm_load_recent_tracks()
 
-	# Last.fm Top Albums Check
-	if conf_last_top_albums > 0:
+	# Last.fm Top Album Check
+	if conf_lastfm_top_albums > 0:
 		# Last.fm Load Top Albums
-		last_load_top_albums()
+		lastfm_load_top_albums()
 
-	# Last.fm Top Tracks Check
-	if conf_last_top_tracks > 0:
+	# Last.fm Top Track Check
+	if conf_lastfm_top_tracks > 0:
 		# Last.fm Load Top Tracks
-		last_load_top_tracks()
+		lastfm_load_top_tracks()
 
-	# Google Music Check Status
-	if conf_gmusic_enabled:
-		# Authenticate Mobile
-		gmusic_authenticate_mobile()
+	# Google Music Authenticate Mobile
+	google_music_authenticate_mobile()
 
-		# Authenticate PC
-		gmusic_authenticate_pc()
+	# Google Music Authenticate PC
+	google_music_authenticate_pc()
 
-		# Get Albums
-		gmusic_get_albums()
+	# Google Music Get Albums
+	google_music_get_albums()
 
-		# Get Tracks
-		gmusic_get_tracks()
+	# Google Music Get Tracks
+	google_music_get_tracks()

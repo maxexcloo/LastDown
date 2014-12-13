@@ -6,24 +6,25 @@ conf_output_track_folder = 'tracks'
 global_albums = []
 global_tracks = []
 
-# Last.fm Configuration
-conf_last_rate_limit = 0
-conf_last_recent_tracks = 0
-conf_last_top_albums = 20
-conf_last_top_albums_period = ['PERIOD_OVERALL']
-conf_last_top_tracks = 20
-conf_last_top_tracks_period = ['PERIOD_OVERALL']
-
 # Last.fm Authentication
-auth_last_user = ''
-auth_last_pass = ''
-auth_last_api_key = ''
-auth_last_api_secret = ''
+auth_lastfm_user = ''
+auth_lastfm_pass = ''
+auth_lastfm_api_key = ''
+auth_lastfm_api_secret = ''
 
-# Google Music Configuration
-conf_gmusic_enabled = True
-conf_gmusic_rate_limit = 0
+# Last.fm Configuration
+conf_lastfm_rate_limit = 0
+conf_lastfm_recent_tracks = 20
+conf_lastfm_top_albums = 20
+conf_lastfm_top_albums_period = ['PERIOD_OVERALL']
+#conf_lastfm_top_albums_period = ['PERIOD_OVERALL', 'PERIOD_7DAYS', 'PERIOD_3MONTHS', 'PERIOD_6MONTHS', 'PERIOD_12MONTHS']
+conf_lastfm_top_tracks = 20
+conf_lastfm_top_tracks_period = ['PERIOD_OVERALL']
+#conf_lastfm_top_tracks_period = ['PERIOD_OVERALL', 'PERIOD_7DAYS', 'PERIOD_3MONTHS', 'PERIOD_6MONTHS', 'PERIOD_12MONTHS']
 
 # Google Music Authentication
-auth_gmusic_user = ''
-auth_gmusic_pass = ''
+auth_google_music_user = ''
+auth_google_music_pass = ''
+
+# Google Music Configuration
+conf_google_music_rate_limit = 0

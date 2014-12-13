@@ -1,17 +1,17 @@
 import codecs
 import config
-import gmusicapi
 import mutagen
 import os
 import pylast
 import string
 import sys
 import time
-import unicodedata
+import urllib
 from config import *
 from gmusicapi import Mobileclient
 from gmusicapi import Webclient
 from mutagen.easyid3 import EasyID3
+from unidecode import unidecode
 
 ############
 ## Common ##
@@ -19,211 +19,188 @@ from mutagen.easyid3 import EasyID3
 
 # Directory Creation
 def common_directories():
-	# Check If Directory Exists
+	# Check If Album Directory Exists
 	if not os.path.exists(conf_output_album_folder):
-		# Create Directory
+		# Create Album Directory
 		os.makedirs(conf_output_album_folder)
 
-	# Check If Directory Exists
+	# Check If Track Directory Exists
 	if not os.path.exists(conf_output_track_folder):
-		# Create Directory
+		# Create Track Directory
 		os.makedirs(conf_output_track_folder)
 
 # Existence Check
 def common_exist(path):
-	# Check If Path Is File
+	# Check If Path Is A File
 	if os.path.isfile(path):
 		# Check Path File Size
 		if os.path.getsize(path) != 0:
-			# Return True If Not Null
+			# Return True If Not Empty, File Exists
 			return True
 
-	# Return False
+	# Return False, File Doesn't Exist
 	return False
 
 # Logging Function
 def common_log(type, text):
-	# Print Message With Category
-	if type != "":
-		print "[" + type + "] " + text
-	# Print Message Without Category
-	else:
-		print text
+	try:
+		# Check If Type Text Exists
+		if type != "":
+			# Print Message With Type
+			print "[" + type + "] " + text
+		# Type Doesn't Exist
+		else:
+			# Print Message Without Type
+			print text
+	except:
+		pass
 
 # Path Sanitisation
-def common_path(path):
-	return "".join(c for c in unicodedata.normalize("NFKD", unicode(path)) if c in "!#&'(),-.=%+[]_ " or c in string.ascii_letters or c in string.digits).strip()
-
-#############
-## Mutagen ##
-#############
-
-# Delete ID3 Tags
-def mutagen_delete(path):
-	# Open MP3 & Delete ID3 Tags
+def common_path(text):
 	try:
-		file = mutagen.File(path, easy = True)
-		file.delall()
-		file.save()
-	# ID3 Deletion Error
+		return "".join(c for c in unidecode(text) if c in "!#&'(),-.=%+[]_ " or c in string.ascii_letters or c in string.digits).strip()
 	except:
-		common_log("Mutagen", "Error Deleting ID3 Tags: " + path)
-
-# Edit MP3 ID3 Tags
-def mutagen_edit(path, artist, album, title, genre, track, year):
-	# Open MP3
-	try:
-		file = EasyID3(path)
-	# Add Missing ID3 Tags
-	except mutagen.id3.ID3NoHeaderError:
-		file = mutagen.File(path, easy = True)
-		file.add_tags()
-
-	# Set Tags
-	file["artist"] = artist
-	file["album"] = album
-	file["title"] = title
-	file["genre"] = genre
-	file["tracknumber"] = track
-	file["date"] = year
-
-	# Save MP3
-	file.save()
+		return "".join(c for c in text if c in "!#&'(),-.=%+[]_ " or c in string.ascii_letters or c in string.digits).strip()
 
 #############
 ## Last.fm ##
 #############
 
 # Authenticate
-def last_authenticate():
+def lastfm_authenticate():
 	common_log("Last.fm", "Authenticating...")
-	global last
+	global lastfm
 
 	# Authenticate
 	try:
-		last = pylast.LastFMNetwork(api_key = auth_last_api_key, api_secret = auth_last_api_secret, username = auth_last_user, password_hash = pylast.md5(auth_last_pass))
+		lastfm = pylast.LastFMNetwork(api_key = auth_lastfm_api_key, api_secret = auth_lastfm_api_secret, username = auth_lastfm_user, password_hash = pylast.md5(auth_lastfm_pass))
 	# Authentication Error
 	except:
 		common_log("Critical", "Last.fm Authentication Failed!")
 		sys.exit(0)
 
 # Create Session
-def last_create_session():
+def lastfm_create_session():
 	common_log("Last.fm", "Creating Session...")
-	global last_user
+	global lastfm_user
 
 	# Create Session
 	try:
-		last_session = pylast.SessionKeyGenerator(last)
-		last_session_key = last_session.get_session_key(auth_last_user, pylast.md5(auth_last_pass))
-		last_user = pylast.User(auth_last_user, last)
+		lastfm_session = pylast.SessionKeyGenerator(lastfm)
+		lastfm_session_key = lastfm_session.get_session_key(auth_lastfm_user, pylast.md5(auth_lastfm_pass))
+		lastfm_user = pylast.User(auth_lastfm_user, lastfm)
 	# Session Error
 	except:
 		common_log("Critical", "Last.fm Session Creation Failed!")
 		sys.exit(0)
 
 # Load Recent Tracks
-def last_load_recent_tracks():
-	common_log("Last.fm", "Loading " + str(conf_last_recent_tracks) + " Recent Tracks...")
+def lastfm_load_recent_tracks():
+	common_log("Last.fm", "Loading " + str(conf_lastfm_recent_tracks) + " Recent Tracks...")
 	page = 0;
 
 	# Check Limit
-	if conf_last_recent_tracks == 0:
+	if conf_lastfm_recent_tracks == 0:
 		limit = None
 	# Normal Limit
 	else:
-		limit = conf_last_recent_tracks
+		limit = conf_lastfm_recent_tracks
 
-	# Page Loop
+	# Loop While Tracks Exist
 	while limit > 0:
-		# Check Limit & Find Recent Tracks
+		# Check Track Count
 		if limit > 200:
-			tracks = last_user.get_recent_tracks(limit = 200, page = page)
-		# Normal Limit
+			# Find Recent Tracks
+			tracks = lastfm_user.get_recent_tracks(limit = 200, page = page)
+		# Normal Track Count
 		else:
-			tracks = last_user.get_recent_tracks(limit = limit, page = page)
+			# Find Recent Tracks
+			tracks = lastfm_user.get_recent_tracks(limit = limit, page = page)
 
-		# Loop Through Tracks & Append
+		# Loop Through Tracks
 		for i in tracks:
+			# Append Tracks To Array
 			global_tracks.append(i)
 
-		# Check Limit
+		# Check Track Count
 		if limit > 200:
 			limit = limit - 200
 			page = page + 1
-		# Normal Limit
+		# Normal Track Count
 		else:
 			limit = 0
 
 		# Sleep For Rate Limit Period
-		time.sleep(conf_last_rate_limit)
+		time.sleep(conf_lastfm_rate_limit)
 
 # Load Top Albums
-def last_load_top_albums():
-	common_log("Last.fm", "Loading Top " + str(conf_last_top_albums) + " Albums...")
+def lastfm_load_top_albums():
+	common_log("Last.fm", "Loading Top " + str(conf_lastfm_top_albums) + " Albums...")
 
 	# Loop Through Time Periods
-	for time_period in conf_last_top_albums_period:
+	for time_period in conf_lastfm_top_albums_period:
 		# Find Top Albums
-		albums = last_user.get_top_albums(period = time_period, limit = conf_last_top_albums)
+		albums = lastfm_user.get_top_albums(period = time_period, limit = conf_lastfm_top_albums)
 
-		# Loop Through Albums & Append
+		# Loop Through Albums
 		for i in albums:
+			# Append Albums To Array
 			global_albums.append(i)
 
 		# Sleep For Rate Limit Period
-		time.sleep(conf_last_rate_limit)
+		time.sleep(conf_lastfm_rate_limit)
 
 # Load Top Tracks
-def last_load_top_tracks():
-	common_log("Last.fm", "Loading Top " + str(conf_last_top_tracks) + " Tracks...")
+def lastfm_load_top_tracks():
+	common_log("Last.fm", "Loading Top " + str(conf_lastfm_top_tracks) + " Tracks...")
 
 	# Loop Through Time Periods
-	for time_period in conf_last_top_tracks_period:
+	for time_period in conf_lastfm_top_tracks_period:
 		# Find Top Tracks
-		tracks = last_user.get_top_tracks(period = time_period, limit = conf_last_top_tracks)
+		tracks = lastfm_user.get_top_tracks(period = time_period, limit = conf_lastfm_top_tracks)
 
-		# Loop Through Tracks & Append
+		# Loop Through Tracks
 		for i in tracks:
+			# Append Tracks To Array
 			global_tracks.append(i)
 
 		# Sleep For Rate Limit Period
-		time.sleep(conf_last_rate_limit)
+		time.sleep(conf_lastfm_rate_limit)
 
 ##################
 ## Google Music ##
 ##################
 
 # Authenticate Mobile
-def gmusic_authenticate_mobile():
+def google_music_authenticate_mobile():
 	common_log("Google Music", "Authenticating Mobile...")
-	global gmusicmobile
+	global google_music_mobile
 
 	# Authenticate Mobile
-	try:
-		gmusicmobile = Mobileclient()
-		gmusicmobile.login(auth_gmusic_user, auth_gmusic_pass)
+	google_music_mobile = Mobileclient()
+	logged_in = google_music_mobile.login(auth_google_music_user, auth_google_music_pass)
+
 	# Authentication Error
-	except:
+	if not logged_in:
 		common_log("Critical", "Google Music Mobile Authentication Failed!")
 		sys.exit(0)
 
 # Authenticate PC
-def gmusic_authenticate_pc():
+def google_music_authenticate_pc():
 	common_log("Google Music", "Authenticating PC...")
-	global gmusicpc
+	global google_music_pc
 
 	# Authenticate PC
-	try:
-		gmusicpc = Webclient()
-		gmusicpc.login(auth_gmusic_user, auth_gmusic_pass)
+	google_music_pc = Webclient()
+	logged_in = google_music_pc.login(auth_google_music_user, auth_google_music_pass)
+
 	# Authentication Error
-	except:
+	if not logged_in:
 		common_log("Critical", "Google Music PC Authentication Failed!")
 		sys.exit(0)
 
 # Download Album
-def gmusic_download_album(id, path):
+def google_music_download_album(id, path):
 	common_log("", "Downloading Album: " + id['artist'] + " - " + id['name'])
 
 	# Download Album
@@ -232,34 +209,64 @@ def gmusic_download_album(id, path):
 		if not os.path.isdir(path):
 			os.makedirs(path)
 
+		# Check Album Art
+		if not common_exist(path + "folder.jpg"):
+			# Download Album Art
+			try:
+				urllib.urlretrieve (id['albumArtRef'], path + "/folder.jpg")
+			# Download Error
+			except:
+				common_log("", "Error Downloading Album Art For: " + id['artist'] + " - " + id['title'])
+
 		# Load Album & Download Tracks
-		for idtr in gmusicmobile.get_album_info(id['albumId'])['tracks']:
-			pathtr = path + "/" + idtr['artistId'][0] + " - " + idtr['storeId'] + ".mp3"
+		for idtrack in google_music_mobile.get_album_info(id['albumId'])['tracks']:
+			pathtrack = path + "/" + common_path(str(idtrack['trackNumber']).zfill(2) + ". " + idtrack['title'] + ".mp3")
 
 			# Check If Track Exists
-			if common_exist(pathtr):
-				common_log("", "Track Already Exists: " + idtr['artist'] + " - " + idtr['title'])
+			if common_exist(pathtrack):
+				common_log("", "Track Already Exists: " + idtrack['artist'] + " - " + idtrack['title'])
 			# Download Track
 			else:
-				gmusic_download_track(idtr, pathtr)
+				google_music_download_track(idtrack, pathtrack)
 	# Download Error
 	except:
 		common_log("", "Download Error: " + id['artist'] + " - " + id['name'])
 
 # Download Track
-def gmusic_download_track(id, path):
+def google_music_download_track(id, path):
 	common_log("", "Downloading Track: " + id['artist'] + " - " + id['title'])
 
 	# Download Track
 	try:
 		# Open Binary Mode File & Write Stream To File
 		file = codecs.open(path, "wb")
-		file.write(gmusicpc.get_stream_audio(id['storeId']))
+		file.write(google_music_pc.get_stream_audio(id['storeId']))
 		file.close()
 
 		# Tag Track
 		try:
-			mutagen_edit(path, id['artist'], id['album'], id['title'], gmusicmobile.get_track_info(id['storeId'])['genre'], str(id['trackNumber']), str(gmusicmobile.get_album_info(id['albumId'])['year']))
+			# Open Track
+			try:
+				file = EasyID3(path)
+			# Add Missing ID3 Tags
+			except mutagen.id3.ID3NoHeaderError:
+				file = mutagen.File(path, easy = True)
+				file.add_tags()
+
+			# Set Tags
+			file["album"] = id['album']
+			file["artist"] = id['artist']
+			file["date"] = str(google_music_mobile.get_album_info(id['albumId'])['year'])
+			try:
+				file["disknumber"] = str(id['discNumber'])
+			except: 
+				pass
+			file["genre"] = google_music_mobile.get_track_info(id['storeId'])['genre']
+			file["title"] = id['title']
+			file["tracknumber"] = str(id['trackNumber']).zfill(2)
+
+			# Save MP3
+			file.save()
 		# Mutagen Error
 		except:
 			common_log("Mutagen", "Error Editing ID3 Tags: " + path)
@@ -275,57 +282,55 @@ def gmusic_download_track(id, path):
 			common_log("", "Error Deleting: " + path)
 
 # Get Top Albums
-def gmusic_get_albums():
+def google_music_get_albums():
 	common_log("Google Music", "Getting Albums...")
 
 	# Loop Through Albums
 	for i in global_albums:
-		name = i[0].__str__()
-		text = name.replace(" - ", " ")
+		text = i[0].__str__()
 
 		# Search Music & Find ID
 		try:
-			result = gmusicmobile.search_all_access(text)
+			result = google_music_mobile.search_all_access(text)
 			id = result['album_hits'][0]['album']
 		# Search Error
 		except:
-			common_log("", "Album Not Found: " + name)
+			common_log("", "Album Not Found: " + text)
 			continue
 
 		# Download Album
-		path = conf_output_album_folder + "/" + id['artistId'][0] + " - " + id['albumId']
-		gmusic_download_album(id, path)
+		path = conf_output_album_folder + "/" + common_path(id['albumArtist'] + " - " + id['name'])
+		google_music_download_album(id, path)
 
 		# Sleep For Rate Limit Period
-		time.sleep(conf_last_rate_limit)
+		time.sleep(conf_lastfm_rate_limit)
 
 # Get Top Tracks
-def gmusic_get_tracks():
+def google_music_get_tracks():
 	common_log("Google Music", "Getting Tracks...")
 
 	# Loop Through Tracks
 	for i in global_tracks:
-		name = i[0].__str__()
-		text = name.replace(" - ", " ")
+		text = i[0].__str__()
 
 		# Search Music & Find ID
 		try:
-			result = gmusicmobile.search_all_access(text)
+			result = google_music_mobile.search_all_access(text)
 			id = result['song_hits'][0]['track']
-			path = conf_output_track_folder + "/" + id['artistId'][0] + " - " + id['storeId'] + ".mp3"
-			pathal = conf_output_album_folder + "/" + id['artistId'][0] + " - " + id['albumId'] + "/" + id['artistId'][0] + " - " + id['storeId'] + ".mp3"
+			path = conf_output_track_folder + "/" + common_path(id['albumArtist'] + " - " + id['title'] + ".mp3")
+			pathalbum = conf_output_album_folder + "/" + common_path(id['albumArtist'] + " - " + id['album']) + "/" + common_path(str(id['trackNumber']).zfill(2) + ". " + id['title'] + ".mp3")
 		# Search Error
 		except:
-			common_log("", "Track Not Found: " + name)
+			common_log("", "Track Not Found: " + text)
 			continue
 
 		# Check If Track Exists
-		if common_exist(path) or common_exist(pathal):
-			common_log("", "Track Already Exists: " + name)
+		if common_exist(path) or common_exist(pathalbum):
+			common_log("", "Track Already Exists: " + text)
 			continue
 
 		# Download Track
-		gmusic_download_track(id, path)
+		google_music_download_track(id, path)
 
 		# Sleep For Rate Limit Period
-		time.sleep(conf_last_rate_limit)
+		time.sleep(conf_lastfm_rate_limit)
